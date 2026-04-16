@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MeasureIt – Login & Signup</title>
+    <link rel="stylesheet" href="login.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@700&display=swap"
+      rel="stylesheet"/>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+  </head>
+  <body>
+    <main id="auth-container">
+      <div class="bg-circle circle-1"></div>
+      <div class="bg-circle circle-2"></div>
+
+      <div class="auth-card-wrapper">
+        <div class="auth-side-info">
+          <div class="brand">
+            <span class="logo-icon">⚖️</span>
+            <span class="logo-text">MeasureIt</span>
+          </div>
+          <h2>Smart Units. Exact Results.</h2>
+          <p>
+            A specialized workspace for high-precision conversions and research
+            data tracking.
+          </p>
+          <div class="feature-list">
+            <div class="f-item">
+              <i class="bi bi-check-circle-fill"></i> Instant Unit Switching
+            </div>
+            <div class="f-item">
+              <i class="bi bi-check-circle-fill"></i> Automated Work History
+            </div>
+            <div class="f-item">
+              <i class="bi bi-check-circle-fill"></i> Precision Accuracy
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-side-form">
+          <div id="login-page" class="auth-page hidden">
+            <h3>Welcome Back</h3>
+            <p class="subtitle">
+              Enter your credentials to access your dashboard
+            </p>
+            <form onsubmit="handleLoginClick(event)">
+              <div class="input-wrap">
+                <label><i class="bi bi-envelope"></i> Email Address</label>
+                <input
+                  type="email"
+                  id="li-email"
+                  placeholder="name@example.com"
+                  oninput="validateField(this)"/>
+                <span class="err" id="err-li-email"></span>
+              </div>
+              <div class="input-wrap">
+                <label><i class="bi bi-lock"></i> Password</label>
+                <div class="password-container">
+                  <input
+                    type="password"
+                    id="li-pass"
+                    placeholder="••••••••"
+                    oninput="validateField(this)"
+                  />
+                  <i
+                    class="bi bi-eye toggle-pass"
+                    onclick="togglePass('li-pass', this)"></i>
+                </div>
+                <span class="err" id="err-li-pass"></span>
+              </div>
+              <button type="submit" class="btn-primary">
+                Sign In <i class="bi bi-arrow-right"></i>
+              </button>
+            </form>
+            <p class="switch-text">
+              New user?
+              <a href="javascript:void(0)" onclick="showPage('signup-page')"
+                >Create an account</a>
+            </p>
+          </div>
+
+          <div id="signup-page" class="auth-page">
+            <h3>Get Started</h3>
+            <p class="subtitle">
+              Join MeasureIt today for seamless conversions
+            </p>
+            <form onsubmit="handleSignupClick(event)">
+              <div class="input-wrap">
+                <label><i class="bi bi-person"></i> Full Name</label>
+                <input
+                  type="text"
+                  id="su-name"
+                  placeholder="John Doe"
+                  oninput="validateField(this)"
+                />
+                <span class="err" id="err-su-name"></span>
+              </div>
+              <div class="input-wrap">
+                <label><i class="bi bi-envelope"></i> Email</label>
+                <input
+                  type="email"
+                  id="su-email"
+                  placeholder="john@example.com"
+                  oninput="validateField(this)"/>
+                <span class="err" id="err-su-email"></span>
+              </div>
+              <div class="input-row">
+                <div class="input-wrap">
+                  <label><i class="bi bi-lock"></i> Password</label>
+                  <div class="password-container">
+                    <input
+                      type="password"
+                      id="su-pass"
+                      placeholder="Min 6 chars"
+                      oninput="validateField(this)"/>
+                    <i
+                      class="bi bi-eye toggle-pass"
+                      onclick="togglePass('su-pass', this)"></i>
+                  </div>
+                  <span class="err" id="err-su-pass"></span>
+                </div>
+                <div class="input-wrap">
+                  <label><i class="bi bi-shield-check"></i> Confirm</label>
+                  <input
+                    type="password"
+                    id="su-cpass"
+                    placeholder="Repeat"
+                    oninput="validateField(this)"/>
+                  <span class="err" id="err-su-cpass"></span>
+                </div>
+              </div>
+              <button type="submit" class="btn-primary">
+                Create Account <i class="bi bi-person-plus"></i>
+              </button>
+            </form>
+            <p class="switch-text">
+              Already have an account?
+              <a href="javascript:void(0)" onclick="showPage('login-page')">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="login.js"></script>
+    <script>
+      function handleSignupClick(e) {
+        e.preventDefault();
+        if (window.doSignupLogic) window.doSignupLogic();
+      }
+      function handleLoginClick(e) {
+        e.preventDefault();
+        if (window.doLoginLogic) window.doLoginLogic();
+      }
+    </script>
+  </body>
+</html>

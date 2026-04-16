@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MeasureIt – Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"/>
+</head>
+<body>
+
+  <!-- app section -->
+  <div id="app-section">
+
+    <!-- topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+        <span class="logo-top">⚖️ MeasureIt</span>
+      </div>
+      <div class="topbar-right">
+        <!-- profile dropdown -->
+        <div class="profile-wrap" onclick="toggleDropdown()">
+          <div class="avatar" id="avatar-initials">JD</div>
+          <i class="bi bi-chevron-down"></i>
+          <div class="dropdown" id="profile-dropdown">
+            <div class="dropdown-user">
+              <div class="avatar sm" id="dd-avatar">JD</div>
+              <div>
+                <strong id="dd-name">John Doe</strong>
+                <small id="dd-email">user@example.com</small>
+              </div>
+            </div>
+            <hr/>
+            <div class="dropdown-item" onclick="toggleTheme()">
+              <i class="bi bi-moon-stars" id="theme-icon"></i>
+              <span id="theme-label">Dark Mode</span>
+            </div>
+            <div class="dropdown-item danger" onclick="handleLogout()">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>Logout</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <a class="nav-item active" onclick="showTab('dashboard')" data-tab="dashboard">
+          <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+        </a>
+        <a class="nav-item" onclick="showTab('length')" data-tab="length">
+          <i class="bi bi-rulers"></i><span>Length</span>
+        </a>
+        <a class="nav-item" onclick="showTab('volume')" data-tab="volume">
+          <i class="bi bi-droplet"></i><span>Volume</span>
+        </a>
+        <a class="nav-item" onclick="showTab('weight')" data-tab="weight">
+          <i class="bi bi-bag"></i><span>Weight</span>
+        </a>
+        <a class="nav-item" onclick="showTab('temperature')" data-tab="temperature">
+          <i class="bi bi-thermometer-half"></i><span>Temperature</span>
+        </a>
+        <a class="nav-item" onclick="showTab('history')" data-tab="history">
+          <i class="bi bi-clock-history"></i><span>History</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- main content -->
+    <main class="main-content" id="main-content">
+
+      <!-- breadcrumbs -->
+      <div class="breadcrumb-nav">
+        <span class="breadcrumb-item">Home</span>
+        <i class="bi bi-chevron-right"></i>
+        <span class="breadcrumb-item" id="breadcrumb-path">Dashboard</span>
+      </div>
+
+      <!-- dashboard tab -->
+      <div class="tab-content" id="tab-dashboard">
+
+        <!-- welcome banner -->
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h2 id="welcome-msg">👋 Welcome back!</h2>
+            <p>What would you like to measure today?</p>
+          </div>
+          <div class="welcome-emoji">⚖️</div>
+        </div>
+
+        <!-- quick access cards -->
+        <h3 class="section-label">⚡ Quick Access</h3>
+        <div class="card-grid">
+          <div class="dash-card" onclick="showTab('length')">
+            <div class="dash-icon">📏</div>
+            <h3>Length</h3>
+            <p>km, m, cm, mm, miles, feet, inches</p>
+            <span class="card-badge">7 units</span>
+          </div>
+          <div class="dash-card" onclick="showTab('volume')">
+            <div class="dash-icon">🧪</div>
+            <h3>Volume</h3>
+            <p>liters, ml, gallons, cups, fl oz</p>
+            <span class="card-badge">5 units</span>
+          </div>
+          <div class="dash-card" onclick="showTab('weight')">
+            <div class="dash-icon">⚖️</div>
+            <h3>Weight</h3>
+            <p>kg, g, mg, lb, oz, ton</p>
+            <span class="card-badge">6 units</span>
+          </div>
+          <div class="dash-card" onclick="showTab('temperature')">
+            <div class="dash-icon">🌡️</div>
+            <h3>Temperature</h3>
+            <p>Celsius, Fahrenheit, Kelvin</p>
+            <span class="card-badge">3 units</span>
+          </div>
+        </div>
+
+        <!-- about + recent side by side -->
+        <div class="dash-bottom">
+
+          <!-- about the app -->
+          <div class="about-box">
+            <h3>📖 About MeasureIt</h3>
+            <p>MeasureIt is a simple and smart quantity measurement tool built for students, engineers, cooks, and curious minds.</p>
+            <ul class="about-list">
+              <li><i class="bi bi-check-circle-fill"></i> Convert between 20+ units instantly</li>
+              <li><i class="bi bi-check-circle-fill"></i> Add, subtract, multiply & divide quantities</li>
+              <li><i class="bi bi-check-circle-fill"></i> Track all your past calculations in History</li>
+              <li><i class="bi bi-check-circle-fill"></i> Each user has their own private history</li>
+              <li><i class="bi bi-check-circle-fill"></i> Light & Dark mode supported</li>
+            </ul>
+            <div class="ops-row">
+              <span class="op-chip">Convert</span>
+              <span class="op-chip">Add</span>
+              <span class="op-chip">Subtract</span>
+              <span class="op-chip">Multiply</span>
+              <span class="op-chip">Divide</span>
+            </div>
+          </div>
+
+          <!-- recent history preview -->
+          <div class="recent-box">
+            <div class="recent-header">
+              <h3>🕓 Recent Activity</h3>
+              <a onclick="showTab('history')">View All →</a>
+            </div>
+            <div id="recent-list"><p class="empty-msg" style="padding:20px 0">No activity yet!</p></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- length tab -->
+      <div class="tab-content hidden" id="tab-length">
+        <h2 class="page-title">📏 Length</h2>
+        <div id="length-calc" class="calculator"></div>
+      </div>
+
+      <!-- volume tab -->
+      <div class="tab-content hidden" id="tab-volume">
+        <h2 class="page-title">🧪 Volume</h2>
+        <div id="volume-calc" class="calculator"></div>
+      </div>
+
+      <!-- weight tab -->
+      <div class="tab-content hidden" id="tab-weight">
+        <h2 class="page-title">⚖️ Weight</h2>
+        <div id="weight-calc" class="calculator"></div>
+      </div>
+
+      <!-- temperature tab -->
+      <div class="tab-content hidden" id="tab-temperature">
+        <h2 class="page-title">🌡️ Temperature</h2>
+        <div id="temperature-calc" class="calculator"></div>
+      </div>
+
+      <!-- history tab -->
+      <div class="tab-content hidden" id="tab-history">
+        <h2 class="page-title">🕓 History</h2>
+        <p class="page-sub">All your past calculations</p>
+        <button class="btn-danger-outline" onclick="clearAllHistory()"><i class="bi bi-trash"></i> Clear All</button>
+        <div id="history-list" class="history-list"></div>
+      </div>
+
+    </main>
+
+  </div><!-- end app-section -->
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

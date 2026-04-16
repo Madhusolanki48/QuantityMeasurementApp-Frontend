@@ -1,0 +1,17 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.project
+.classpath
+.settings/
+
+# Node (if used later)
+node_modules/
+
+# Logs
+*.log
+
+# OS temp files
+*.tmp
