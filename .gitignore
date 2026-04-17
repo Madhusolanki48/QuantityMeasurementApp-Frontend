@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.angular/
+coverage/
+*.log
+
+# editor and ide
+.vscode/
+.idea/
+.project
+
+# os files
+.DS_Store
+Thumbs.db

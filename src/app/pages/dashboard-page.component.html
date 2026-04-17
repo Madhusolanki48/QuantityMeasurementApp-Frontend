@@ -1,0 +1,206 @@
+﻿<div class="dashboard-shell" id="app-section">
+  <!-- top bar and side menu -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button type="button" class="hamburger" (click)="toggleSidebar()">
+        <i class="bi bi-list color-icon menu-icon"></i>
+      </button>
+      <span class="logo-top">
+        <i class="bi bi-calculator-fill brand-icon"></i>
+        <span>MeasureIt</span>
+      </span>
+    </div>
+
+    <div class="topbar-right">
+      <div class="profile-wrap" (click)="toggleDropdown()">
+        <div class="avatar">{{ initials }}</div>
+        <i class="bi bi-chevron-down"></i>
+
+        <div class="dropdown" [class.open]="profileOpen" (click)="$event.stopPropagation()">
+          <div class="dropdown-user">
+            <div class="avatar sm">{{ initials }}</div>
+            <div>
+              <strong>{{ user?.displayName }}</strong>
+              <small>{{ user?.email }}</small>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="dropdown-item" (click)="$event.stopPropagation(); toggleTheme()">
+            <i
+              class="bi color-icon theme-icon"
+              [class.bi-moon-stars-fill]="theme === 'light'"
+              [class.bi-sun-fill]="theme === 'dark'"
+            ></i>
+            <span>{{ theme === 'light' ? 'Dark Mode' : 'Light Mode' }}</span>
+          </div>
+
+          <div class="dropdown-item danger" (click)="$event.stopPropagation(); logout()">
+            <i class="bi bi-box-arrow-right color-icon danger-icon"></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <aside
+    class="sidebar"
+    [class.collapsed]="!isMobile && sidebarCollapsed"
+    [class.open]="isMobile && mobileSidebarOpen"
+  >
+    <nav>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="showTab('dashboard')">
+        <i class="bi bi-speedometer2 nav-icon dashboard-icon"></i><span>Dashboard</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'length'" (click)="showTab('length')">
+        <i class="bi bi-rulers nav-icon length-icon"></i><span>Length</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'volume'" (click)="showTab('volume')">
+        <i class="bi bi-droplet-fill nav-icon volume-icon"></i><span>Volume</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'weight'" (click)="showTab('weight')">
+        <i class="bi bi-box-seam-fill nav-icon weight-icon"></i><span>Weight</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'temperature'" (click)="showTab('temperature')">
+        <i class="bi bi-thermometer-half nav-icon temperature-icon"></i><span>Temperature</span>
+      </button>
+      <button type="button" class="nav-item" [class.active]="activeTab === 'history'" (click)="showTab('history')">
+        <i class="bi bi-clock-history nav-icon history-icon"></i><span>History</span>
+      </button>
+    </nav>
+  </aside>
+
+  <main class="main-content" [class.full]="!isMobile && sidebarCollapsed">
+    <div class="breadcrumb-nav">
+      <span class="breadcrumb-item">Home</span>
+      <i class="bi bi-chevron-right breadcrumb-icon"></i>
+      <span class="breadcrumb-item">{{ breadcrumb }}</span>
+    </div>
+
+    <!-- dashboard home -->
+    <ng-container *ngIf="activeTab === 'dashboard'">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Welcome back, {{ firstName }}!</h2>
+          <p>What would you like to measure today?</p>
+        </div>
+        <div class="welcome-emoji">
+          <span class="welcome-icon" aria-hidden="true">
+            <svg class="welcome-mark" viewBox="0 0 64 64" role="img">
+              <rect x="10" y="12" width="44" height="40" rx="12" class="welcome-mark-shell"></rect>
+              <path d="M18 24h28" class="welcome-mark-line"></path>
+              <path d="M18 32h6M28 32h6M38 32h6" class="welcome-mark-ticks"></path>
+              <path d="M18 40h10M32 40h10" class="welcome-mark-ticks"></path>
+              <rect x="22" y="20" width="6" height="4" rx="1.5" class="welcome-mark-dot"></rect>
+              <rect x="32" y="20" width="6" height="4" rx="1.5" class="welcome-mark-dot"></rect>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <h3 class="section-label">Quick Access</h3>
+      <div class="card-grid">
+        <div class="dash-card" *ngFor="let card of cards" (click)="showTab(card.type)">
+          <div class="dash-icon" [ngClass]="'icon-tone-' + card.type">
+            <i class="bi" [ngClass]="card.icon"></i>
+          </div>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.description }}</p>
+          <span class="card-badge">{{ card.units.length }} units</span>
+        </div>
+      </div>
+
+      <div class="dash-bottom">
+        <div class="about-box">
+          <h3>About MeasureIt</h3>
+          <p>
+            MeasureIt is a simple and smart quantity measurement tool built for students,
+            engineers, cooks, and curious minds.
+          </p>
+          <ul class="about-list">
+            <li><i class="bi bi-check-circle-fill"></i> Convert between supported units</li>
+            <li><i class="bi bi-check-circle-fill"></i> Add, subtract, multiply, and divide values</li>
+            <li><i class="bi bi-check-circle-fill"></i> Save your calculation history in the browser</li>
+            <li><i class="bi bi-check-circle-fill"></i> Light and dark mode supported</li>
+          </ul>
+          <div class="ops-row">
+            <span class="op-chip convert-chip">Convert</span>
+            <span class="op-chip add-chip">Add</span>
+            <span class="op-chip subtract-chip">Subtract</span>
+            <span class="op-chip divide-chip">Divide</span>
+            <span class="op-chip multiply-chip">Multiply</span>
+          </div>
+        </div>
+
+        <div class="recent-box">
+          <div class="recent-header">
+            <h3>Recent Activity</h3>
+            <a (click)="showTab('history')">View All <span>→</span></a>
+          </div>
+
+          <div *ngIf="activeHistory.length === 0">
+            <p class="empty-msg" style="padding: 16px 0; font-size: 13px">No activity yet!</p>
+          </div>
+
+          <div *ngFor="let item of activeHistory" class="recent-item">
+            <div class="recent-item-left">
+              <strong>{{ item.op }}</strong>
+              <span>{{ item.expr }}</span>
+            </div>
+            <div class="recent-item-right">{{ item.result }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="isCalculatorTab(activeTab)">
+      <h2 class="page-title">
+        <i class="bi page-icon" [ngClass]="[activeIcon, 'icon-tone-' + activeTab]"></i>
+        {{ activeTab | titlecase }}
+      </h2>
+      <app-quantity-calculator *ngIf="measurementTab as tab" [type]="tab" (saved)="onSaved()"></app-quantity-calculator>
+    </ng-container>
+
+    <!-- saved calculations -->
+    <ng-container *ngIf="activeTab === 'history'">
+      <h2 class="page-title"><i class="bi bi-clock-history page-icon history-icon"></i> History</h2>
+      <p class="page-sub">All your past calculations.</p>
+      <button type="button" class="btn-danger-outline" (click)="clearAllHistory()">
+        <i class="bi bi-trash trash-icon"></i> Clear All
+      </button>
+
+      <div class="history-list" *ngIf="history.length > 0; else noHistory">
+        <div class="timeline">
+          <div
+            class="timeline-item fade-in"
+            *ngFor="let item of history; let index = index"
+            [style.animationDelay]="index * 50 + 'ms'"
+          >
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="timeline-icon" [ngClass]="'icon-tone-' + item.type">
+                  <i class="bi bi-clipboard-data"></i>
+                </span>
+                <span class="timeline-type">{{ item.op }}</span>
+                <span class="timeline-op">saved</span>
+              </div>
+              <div class="timeline-expr">{{ item.expr }}</div>
+              <div class="timeline-result">{{ item.result }}</div>
+              <div class="timeline-time">{{ item.time }}</div>
+              <button type="button" class="timeline-del" (click)="deleteHistory(item.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noHistory>
+        <div class="empty-msg">No history yet. Start calculating!</div>
+      </ng-template>
+    </ng-container>
+  </main>
+</div>

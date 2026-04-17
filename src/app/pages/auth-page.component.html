@@ -1,0 +1,111 @@
+﻿<main id="auth-container" class="auth-shell">
+  <div class="bg-circle circle-1"></div>
+  <div class="bg-circle circle-2"></div>
+
+  <!-- left side info box -->
+  <div class="auth-card-wrapper">
+    <section class="auth-side-info">
+      <div class="brand">
+        <span class="logo-icon"><i class="bi bi-calculator-fill"></i></span>
+        <span class="logo-text">MeasureIt</span>
+      </div>
+      <h2>Smart Units. Exact Results.</h2>
+      <p>A simple workspace for unit conversions and everyday calculations.</p>
+      <div class="feature-list">
+        <div class="f-item">
+          <i class="bi bi-stars feature-icon feature-icon-a"></i>
+          Fast quantity calculations
+        </div>
+        <div class="f-item">
+          <i class="bi bi-clock-history feature-icon feature-icon-b"></i>
+          Saved calculation history
+        </div>
+        <div class="f-item">
+          <i class="bi bi-phone feature-icon feature-icon-c"></i>
+          Clean responsive layout
+        </div>
+      </div>
+    </section>
+
+    <!-- login and signup form -->
+    <section class="auth-side-form">
+      <div class="auth-page">
+        <h3>{{ isLogin ? 'Sign In' : 'Create Account' }}</h3>
+        <p class="subtitle">
+          {{ isLogin ? 'Use your email and password to continue.' : 'Create an account to start using MeasureIt.' }}
+        </p>
+
+        <form *ngIf="isLogin" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+          <div class="input-wrap">
+            <label><i class="bi bi-envelope-paper-heart-fill label-icon label-icon-mail"></i> Email Address</label>
+            <input type="email" formControlName="email" placeholder="name@example.com" />
+            <span class="err">{{ controlError('login', 'email') }}</span>
+          </div>
+
+          <div class="input-wrap">
+            <label><i class="bi bi-shield-lock-fill label-icon label-icon-lock"></i> Password</label>
+            <div class="password-container">
+              <input [type]="showLoginPassword ? 'text' : 'password'" formControlName="password" placeholder="password" />
+              <button type="button" class="toggle-pass" (click)="showLoginPassword = !showLoginPassword">
+                <i class="bi" [class.bi-eye]="!showLoginPassword" [class.bi-eye-slash]="showLoginPassword"></i>
+              </button>
+            </div>
+            <span class="err">{{ controlError('login', 'password') }}</span>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Sign In <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
+
+        <form *ngIf="!isLogin" [formGroup]="signupForm" (ngSubmit)="submitSignup()">
+          <div class="input-wrap">
+            <label><i class="bi bi-person-fill label-icon label-icon-person"></i> Full Name</label>
+            <input type="text" formControlName="displayName" placeholder="your name" />
+            <span class="err">{{ controlError('signup', 'displayName') }}</span>
+          </div>
+
+          <div class="input-wrap">
+            <label><i class="bi bi-envelope-paper-heart-fill label-icon label-icon-mail"></i> Email Address</label>
+            <input type="email" formControlName="email" placeholder="name@example.com" />
+            <span class="err">{{ controlError('signup', 'email') }}</span>
+          </div>
+
+          <div class="input-row">
+            <div class="input-wrap" style="flex: 1">
+              <label><i class="bi bi-shield-lock-fill label-icon label-icon-lock"></i> Password</label>
+              <div class="password-container">
+                <input [type]="showSignupPassword ? 'text' : 'password'" formControlName="password" placeholder="minimum 6 characters" />
+                <button type="button" class="toggle-pass" (click)="showSignupPassword = !showSignupPassword">
+                  <i class="bi" [class.bi-eye]="!showSignupPassword" [class.bi-eye-slash]="showSignupPassword"></i>
+                </button>
+              </div>
+              <span class="err">{{ controlError('signup', 'password') }}</span>
+            </div>
+
+            <div class="input-wrap" style="flex: 1">
+              <label><i class="bi bi-patch-check-fill label-icon label-icon-confirm"></i> Confirm</label>
+              <div class="password-container">
+                <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="repeat password" />
+                <button type="button" class="toggle-pass" (click)="showConfirmPassword = !showConfirmPassword">
+                  <i class="bi" [class.bi-eye]="!showConfirmPassword" [class.bi-eye-slash]="showConfirmPassword"></i>
+                </button>
+              </div>
+              <span class="err">{{ controlError('signup', 'confirmPassword') }}</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Create Account <i class="bi bi-person-plus"></i>
+          </button>
+        </form>
+
+        <p class="switch-text">
+          <button type="button" class="link-btn" (click)="toggleMode()">
+            {{ isLogin ? 'Need an account? Sign up' : 'Already have an account? Sign in' }}
+          </button>
+        </p>
+      </div>
+    </section>
+  </div>
+</main>

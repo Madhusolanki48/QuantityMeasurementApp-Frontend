@@ -1,0 +1,55 @@
+﻿<div class="calculator">
+  <div class="calc-ops">
+    <button
+      type="button"
+      class="op-btn"
+      *ngFor="let op of operations"
+      [class.active]="activeOp === op"
+      (click)="setOperation(op)"
+    >
+      {{ op }}
+    </button>
+  </div>
+
+  <div class="calc-note">
+    <i class="bi bi-info-circle"></i>
+    calculations are saved in your browser for now.
+  </div>
+
+  <div class="calc-row">
+    <label>Value 1</label>
+    <input class="calc-input" [class.input-error]="!!errorMessage" [(ngModel)]="value1" type="number" placeholder="0" />
+    <select class="unit-select" [(ngModel)]="unit1">
+      <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+    </select>
+  </div>
+
+  <div class="calc-row" *ngIf="activeOp === 'Convert'">
+    <label>To</label>
+    <select class="unit-select" [(ngModel)]="unit2" style="flex: 1">
+      <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+    </select>
+    <button type="button" class="btn-swap" (click)="swapUnits()" title="Swap units">
+      <i class="bi bi-arrow-left-right"></i>
+    </button>
+  </div>
+
+  <div class="calc-row" *ngIf="activeOp !== 'Convert'">
+    <label>{{ isScalarOperation ? 'Factor' : 'Value 2' }}</label>
+    <input class="calc-input" [class.input-error]="!!errorMessage" [(ngModel)]="value2" type="number" placeholder="0" />
+    <select class="unit-select" [(ngModel)]="unit2" *ngIf="!isScalarOperation">
+      <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+    </select>
+  </div>
+
+  <button type="button" class="btn-calc" (click)="calculate()">
+    Calculate <i class="bi bi-arrow-right"></i>
+  </button>
+
+  <div class="result-box" [class.show]="showResult" [class.success-animation]="flashResult">
+    <div class="result-label">{{ resultLabel }}</div>
+    <div class="result-value">{{ result }}</div>
+  </div>
+
+  <div class="err" *ngIf="errorMessage" style="margin-top: 10px">{{ errorMessage }}</div>
+</div>
