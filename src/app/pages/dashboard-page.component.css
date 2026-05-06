@@ -659,6 +659,33 @@
   color: #fff;
 }
 
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.history-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.history-filter select {
+  min-width: 160px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+}
+
 .history-list {
   display: flex;
   flex-direction: column;
@@ -870,6 +897,20 @@
 
   .dash-bottom {
     grid-template-columns: 1fr;
+  }
+
+  .history-toolbar {
+    align-items: stretch;
+  }
+
+  .history-filter {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .history-filter select {
+    flex: 1;
+    min-width: 0;
   }
 
   .breadcrumb-nav {

@@ -1,11 +1,12 @@
 ﻿export type MeasurementType = 'length' | 'volume' | 'weight' | 'temperature';
-export type Operation = 'Convert' | 'Add' | 'Subtract' | 'Multiply' | 'Divide';
+export type Operation = 'Convert' | 'Add' | 'Subtract' | 'Compare' | 'Divide';
 export type DashboardTab = 'dashboard' | MeasurementType | 'history';
 
 export interface AppUser {
   displayName: string;
   email: string;
   password: string;
+  backendId?: number;
 }
 
 export interface HistoryEntry {

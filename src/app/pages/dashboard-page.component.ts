@@ -1,18 +1,22 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { QuantityCalculatorComponent } from '../shared/quantity-calculator.component';
 import { AuthService } from '../core/auth.service';
 import { MeasurementService } from '../core/measurement.service';
 import { ToastService } from '../core/toast.service';
-import { AppUser, DashboardTab, HistoryEntry, MeasurementMeta, MeasurementType } from '../models';
+import { AppUser, DashboardTab, HistoryEntry, MeasurementMeta, MeasurementType, Operation } from '../models';
+import { ApiService, BackendHistoryEntry } from '../../services/api.service';
+
+type HistoryFilter = 'all' | 'add' | 'subtract' | 'convert' | 'compare' | 'divide';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, QuantityCalculatorComponent],
+  imports: [CommonModule, FormsModule, QuantityCalculatorComponent],
   templateUrl: './dashboard-page.component.html',
-  styleUrls: ['./dashboard-page.component.css']
+  styleUrls: ['./dashboard-page.component.css'],
 })
 export class DashboardPageComponent implements OnInit {
   user: AppUser | null = null;
@@ -24,12 +28,15 @@ export class DashboardPageComponent implements OnInit {
   theme: 'light' | 'dark' = 'light';
   history: HistoryEntry[] = [];
   cards: MeasurementMeta[] = [];
+  historyFilter: HistoryFilter = 'all';
+  historyLoading = false;
 
   constructor(
     private readonly authService: AuthService,
     private readonly measurementService: MeasurementService,
     private readonly toastService: ToastService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly api: ApiService,
   ) {}
 
   ngOnInit(): void {
@@ -37,17 +44,34 @@ export class DashboardPageComponent implements OnInit {
     this.sidebarCollapsed = false;
     this.mobileSidebarOpen = false;
 
-    this.user = this.authService.getCurrentUser();
-    if (!this.user) {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
       this.router.navigateByUrl('/login');
       return;
     }
 
-    this.cards = this.measurementService.metaList();
-    // load the saved theme and history before showing the page
-    this.applyTheme(this.getStoredTheme());
-    this.loadHistory();
-    this.showTab('dashboard');
+    this.user = currentUser;
+    this.authService.resolveBackendUserId().subscribe({
+      next: (syncedUser) => {
+        if (this.user && this.user.backendId !== syncedUser) {
+          this.user = {
+            ...this.user,
+            backendId: syncedUser,
+          };
+        }
+
+        this.cards = this.measurementService.metaList();
+        this.applyTheme(this.getStoredTheme());
+        this.loadHistory();
+        this.showTab('dashboard');
+      },
+      error: () => {
+        this.cards = this.measurementService.metaList();
+        this.applyTheme(this.getStoredTheme());
+        this.loadHistory();
+        this.showTab('dashboard');
+      },
+    });
   }
 
   @HostListener('window:resize')
@@ -83,7 +107,7 @@ export class DashboardPageComponent implements OnInit {
       volume: 'Converters > Volume',
       weight: 'Converters > Weight',
       temperature: 'Converters > Temperature',
-      history: 'History'
+      history: 'History',
     };
 
     return labels[this.activeTab];
@@ -128,7 +152,6 @@ export class DashboardPageComponent implements OnInit {
   }
 
   toggleTheme(): void {
-    // save theme choice for next time
     this.setTheme(this.theme === 'dark' ? 'light' : 'dark');
     this.toastService.show(this.theme === 'dark' ? 'Dark mode enabled.' : 'Light mode enabled.');
   }
@@ -144,24 +167,33 @@ export class DashboardPageComponent implements OnInit {
   }
 
   clearAllHistory(): void {
-    if (!this.user) {
+    if (!this.user?.backendId) {
+      this.toastService.show('No backend user is linked yet.');
       return;
     }
 
-    // remove all saved history for this user
-    this.measurementService.clearHistory(this.user.email);
-    this.history = [];
-    this.toastService.show('History cleared.');
+    this.api.clearUserHistory(this.user.backendId).subscribe({
+      next: () => {
+        this.toastService.show('History cleared.');
+        this.loadHistory();
+      },
+      error: () => this.toastService.show('Failed to clear history.'),
+    });
   }
 
-  deleteHistory(id: number): void {
-    if (!this.user) {
+  deleteHistory(_id: number): void {
+    if (!this.user?.backendId) {
+      this.toastService.show('No backend user is linked yet.');
       return;
     }
 
-    this.measurementService.deleteHistory(this.user.email, id);
-    this.loadHistory();
-    this.toastService.show('History item removed.');
+    this.api.deleteUserHistory(this.user.backendId, _id).subscribe({
+      next: () => {
+        this.toastService.show('History entry deleted.');
+        this.loadHistory();
+      },
+      error: () => this.toastService.show('Failed to delete history entry.'),
+    });
   }
 
   private applyTheme(theme: 'light' | 'dark'): void {
@@ -181,11 +213,161 @@ export class DashboardPageComponent implements OnInit {
   }
 
   private loadHistory(): void {
-    if (!this.user) {
+    const currentUser = this.user;
+    if (!currentUser) {
       this.history = [];
       return;
     }
 
-    this.history = this.measurementService.getHistory(this.user.email);
+    this.historyLoading = true;
+
+    this.authService.resolveBackendUserId().subscribe({
+      next: (userId) => {
+        const request$ =
+          this.historyFilter === 'all'
+            ? this.api.getUserHistory(userId)
+            : this.api.getUserHistoryByOperation(userId, this.historyFilter);
+
+        request$.subscribe({
+          next: (res) => {
+            this.history = res.map((item) => this.mapHistoryEntry(item));
+            this.historyLoading = false;
+          },
+          error: () => {
+            this.history = [];
+            this.historyLoading = false;
+            this.toastService.show('Failed to load history.');
+          },
+        });
+      },
+      error: () => {
+        this.historyLoading = false;
+        this.toastService.show('Failed to resolve your backend user.');
+      },
+    });
+  }
+
+  private mapHistoryEntry(item: BackendHistoryEntry): HistoryEntry {
+    const op = this.toOperation(item.operation);
+    const type = this.toMeasurementType(item.measurementType || item.first?.measurementType || '');
+    return {
+      id: item.id,
+      op,
+      type,
+      icon: 'bi-clipboard-data',
+      expr: this.formatExpression(item, op),
+      result: this.formatResult(item, op),
+      time: this.formatTimestamp(item.timestamp ?? ''),
+    };
+  }
+
+  private formatExpression(item: BackendHistoryEntry, op: Operation): string {
+    const firstUnit = this.unitLabel(item.firstUnit ?? item.first?.unit ?? '');
+    const secondUnit = this.unitLabel(item.secondUnit ?? item.second?.unit ?? '');
+    const firstValue = item.firstValue ?? item.first?.value ?? 0;
+    const secondValue = item.secondValue ?? item.second?.value ?? null;
+    const resultUnit = op === 'Convert' ? secondUnit : op === 'Divide' ? '' : firstUnit;
+    const resultText = this.formatNumeric(item.result ?? null);
+
+    switch (op) {
+      case 'Convert':
+        return `${this.formatNumeric(firstValue)} ${firstUnit} -> ${resultText} ${resultUnit}`.trim();
+      case 'Add':
+        return `${this.formatNumeric(firstValue)} ${firstUnit} + ${this.formatNumeric(secondValue)} ${secondUnit} = ${resultText} ${resultUnit}`.trim();
+      case 'Subtract':
+        return `${this.formatNumeric(firstValue)} ${firstUnit} - ${this.formatNumeric(secondValue)} ${secondUnit} = ${resultText} ${resultUnit}`.trim();
+      case 'Compare':
+        return `${this.formatNumeric(firstValue)} ${firstUnit} ? ${this.formatNumeric(secondValue)} ${secondUnit}`;
+      case 'Divide':
+        return `${this.formatNumeric(firstValue)} ${firstUnit} / ${this.formatNumeric(secondValue)} ${secondUnit} = ${resultText}`;
+      default:
+        return `${this.formatNumeric(firstValue)} ${firstUnit}`;
+    }
+  }
+
+  private formatResult(item: BackendHistoryEntry, op: Operation): string {
+    const value = this.formatNumeric(item.result ?? null);
+    if (op === 'Divide') {
+      return value;
+    }
+
+    if (op === 'Compare') {
+      return (item.result ?? 0) === 1 ? 'Equal' : 'Not Equal';
+    }
+
+    const unit =
+      op === 'Convert'
+        ? this.unitLabel(item.secondUnit ?? item.second?.unit ?? '')
+        : this.unitLabel(item.firstUnit ?? item.first?.unit ?? '');
+    return unit ? `${value} ${unit}` : value;
+  }
+
+  private formatTimestamp(timestamp: string): string {
+    const value = new Date(timestamp);
+    return Number.isNaN(value.getTime()) ? timestamp : value.toLocaleString();
+  }
+
+  private formatNumeric(value: number | null | undefined): string {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return '-';
+    }
+
+    return Number.isInteger(value) ? `${value}` : `${Number(value.toFixed(6))}`;
+  }
+
+  private unitLabel(unit: string): string {
+    const labels: Record<string, string> = {
+      INCH: 'Inch',
+      FEET: 'Feet',
+      YARDS: 'Yards',
+      CENTIMETERS: 'Centimeters',
+      MILLILITRE: 'Millilitre',
+      LITRE: 'Litre',
+      GALLON: 'Gallon',
+      GRAM: 'Gram',
+      KILOGRAM: 'Kilogram',
+      POUND: 'Pound',
+      CELSIUS: 'Celsius',
+      FAHRENHEIT: 'Fahrenheit',
+      KELVIN: 'Kelvin',
+    };
+
+    return labels[unit] ?? unit;
+  }
+
+  private toMeasurementType(type: string): MeasurementType {
+    switch ((type ?? '').toLowerCase()) {
+      case 'lengthunit':
+        return 'length';
+      case 'volumeunit':
+        return 'volume';
+      case 'weightunit':
+        return 'weight';
+      case 'temperatureunit':
+        return 'temperature';
+      default:
+        return 'length';
+    }
+  }
+
+  private toOperation(operation: string): Operation {
+    switch (operation?.toUpperCase()) {
+      case 'ADD':
+        return 'Add';
+      case 'SUBTRACT':
+        return 'Subtract';
+      case 'COMPARE':
+        return 'Compare';
+      case 'DIVIDE':
+        return 'Divide';
+      case 'CONVERT':
+      default:
+        return 'Convert';
+    }
+  }
+
+  onHistoryFilterChange(filter: string): void {
+    this.historyFilter = (filter as HistoryFilter) ?? 'all';
+    this.loadHistory();
   }
 }

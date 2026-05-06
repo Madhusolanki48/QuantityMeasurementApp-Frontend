@@ -1,13 +1,16 @@
-﻿import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { AppUser } from '../models';
+import { ApiService } from '../../services/api.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly currentUserKey = 'miq_current_user';
   private readonly usersKey = 'miq_users';
+
+  constructor(private readonly api: ApiService) {}
 
   getCurrentUser(): AppUser | null {
     const raw = localStorage.getItem(this.currentUserKey);
@@ -30,7 +33,6 @@ export class AuthService {
     const cleanName = displayName.trim();
     const cleanEmail = email.trim().toLowerCase();
 
-    // save users in local storage for now
     if (!cleanName || !cleanEmail || !password) {
       return of({ ok: false, message: 'Please fill in all fields.' });
     }
@@ -43,27 +45,33 @@ export class AuthService {
     const user: AppUser = {
       displayName: cleanName,
       email: cleanEmail,
-      password
+      password,
     };
 
-    users.push(user);
-    localStorage.setItem(this.usersKey, JSON.stringify(users));
-    localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+    this.persistUser(user, [...users, user]);
 
-    return of({ ok: true, message: 'Account created successfully.' });
+    return this.syncBackendUser(user).pipe(
+      tap((syncedUser) => this.persistUser(syncedUser)),
+      map(() => ({ ok: true, message: 'Account created successfully.' })),
+      catchError(() => of({ ok: true, message: 'Account created successfully.' })),
+    );
   }
 
   login(email: string, password: string): Observable<{ ok: boolean; message: string }> {
     const cleanEmail = email.trim().toLowerCase();
-    // check the saved users list
     const user = this.getUsers().find((item) => item.email === cleanEmail && item.password === password);
 
     if (!user) {
       return of({ ok: false, message: 'Invalid email or password.' });
     }
 
-    localStorage.setItem(this.currentUserKey, JSON.stringify(user));
-    return of({ ok: true, message: 'Login successful.' });
+    this.persistUser(user);
+
+    return this.syncBackendUser(user).pipe(
+      tap((syncedUser) => this.persistUser(syncedUser)),
+      map(() => ({ ok: true, message: 'Login successful.' })),
+      catchError(() => of({ ok: true, message: 'Login successful.' })),
+    );
   }
 
   logout(): void {
@@ -89,5 +97,65 @@ export class AuthService {
 
   getEmail(): string {
     return this.getCurrentUser()?.email ?? '';
+  }
+
+  ensureBackendUser(): Observable<AppUser | null> {
+    const user = this.getCurrentUser();
+    if (!user) {
+      return of(null);
+    }
+
+    if (user.backendId) {
+      return of(user);
+    }
+
+    return this.syncBackendUser(user).pipe(
+      tap((syncedUser) => this.persistUser(syncedUser)),
+      catchError(() => of(user)),
+    );
+  }
+
+  resolveBackendUserId(): Observable<number> {
+    const user = this.getCurrentUser();
+    if (!user) {
+      return of(1);
+    }
+
+    if (user.backendId) {
+      return of(user.backendId);
+    }
+
+    return this.syncBackendUser(user).pipe(
+      tap((syncedUser) => this.persistUser(syncedUser)),
+      map((syncedUser) => syncedUser.backendId ?? 1),
+      catchError(() => of(1)),
+    );
+  }
+
+  private syncBackendUser(user: AppUser): Observable<AppUser> {
+    if (user.backendId) {
+      return of(user);
+    }
+
+    return this.api.createUser({
+      name: user.displayName,
+      email: user.email,
+      provider: 'local',
+    }).pipe(
+      map((backendUser) => ({
+        ...user,
+        backendId: backendUser.id,
+      })),
+      catchError(() => of(user)),
+    );
+  }
+
+  private persistUser(user: AppUser, users = this.getUsers()): void {
+    const nextUsers = users.some((item) => item.email === user.email)
+      ? users.map((item) => (item.email === user.email ? user : item))
+      : [...users, user];
+
+    localStorage.setItem(this.usersKey, JSON.stringify(nextUsers));
+    localStorage.setItem(this.currentUserKey, JSON.stringify(user));
   }
 }

@@ -11,11 +11,6 @@
     </button>
   </div>
 
-  <div class="calc-note">
-    <i class="bi bi-info-circle"></i>
-    calculations are saved in your browser for now.
-  </div>
-
   <div class="calc-row">
     <label>Value 1</label>
     <input class="calc-input" [class.input-error]="!!errorMessage" [(ngModel)]="value1" type="number" placeholder="0" />
@@ -35,15 +30,15 @@
   </div>
 
   <div class="calc-row" *ngIf="activeOp !== 'Convert'">
-    <label>{{ isScalarOperation ? 'Factor' : 'Value 2' }}</label>
+    <label>Value 2</label>
     <input class="calc-input" [class.input-error]="!!errorMessage" [(ngModel)]="value2" type="number" placeholder="0" />
-    <select class="unit-select" [(ngModel)]="unit2" *ngIf="!isScalarOperation">
+    <select class="unit-select" [(ngModel)]="unit2">
       <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
     </select>
   </div>
 
-  <button type="button" class="btn-calc" (click)="calculate()">
-    Calculate <i class="bi bi-arrow-right"></i>
+  <button type="button" class="btn-calc" (click)="calculate()" [disabled]="isLoading">
+    {{ isLoading ? 'Calculating...' : 'Calculate' }} <i class="bi bi-arrow-right"></i>
   </button>
 
   <div class="result-box" [class.show]="showResult" [class.success-animation]="flashResult">

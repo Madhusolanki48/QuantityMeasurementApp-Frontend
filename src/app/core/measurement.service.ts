@@ -140,20 +140,21 @@ export class MeasurementService {
           )} = ${this.formatNumber(result)} ${this.unitLabel(input.unit1)}`
         };
       }
-      case 'Multiply': {
-        const result = input.value1 * (input.value2 ?? 1);
+      case 'Compare': {
+        const second = this.convert(type, input.value2 ?? 0, input.unit2 ?? input.unit1, input.unit1);
+        const result = input.value1 === second ? 1 : 0;
         return {
-          display: `${this.formatNumber(result)} ${this.unitLabel(input.unit1)}`,
-          expr: `${this.formatNumber(input.value1)} x ${this.formatNumber(input.value2 ?? 1)} = ${this.formatNumber(result)} ${this.unitLabel(
-            input.unit1
-          )}`
+          display: result === 1 ? 'Equal' : 'Not Equal',
+          expr: `${this.formatNumber(input.value1)} ${this.unitLabel(input.unit1)} ? ${this.formatNumber(input.value2 ?? 0)} ${this.unitLabel(
+            input.unit2 ?? input.unit1
+          )} = ${result === 1 ? 'Equal' : 'Not Equal'}`
         };
       }
       case 'Divide': {
         const result = input.value1 / (input.value2 ?? 1);
         return {
           display: `${this.formatNumber(result)} ${this.unitLabel(input.unit1)}`,
-          expr: `${this.formatNumber(input.value1)} ÷ ${this.formatNumber(input.value2 ?? 1)} = ${this.formatNumber(result)} ${this.unitLabel(
+          expr: `${this.formatNumber(input.value1)} / ${this.formatNumber(input.value2 ?? 1)} = ${this.formatNumber(result)} ${this.unitLabel(
             input.unit1
           )}`
         };

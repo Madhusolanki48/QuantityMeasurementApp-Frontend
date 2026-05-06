@@ -121,23 +121,23 @@
           </p>
           <ul class="about-list">
             <li><i class="bi bi-check-circle-fill"></i> Convert between supported units</li>
-            <li><i class="bi bi-check-circle-fill"></i> Add, subtract, multiply, and divide values</li>
-            <li><i class="bi bi-check-circle-fill"></i> Save your calculation history in the browser</li>
+            <li><i class="bi bi-check-circle-fill"></i> Add, subtract, compare, and divide values</li>
+            <li><i class="bi bi-check-circle-fill"></i> Save your calculation history through the backend</li>
             <li><i class="bi bi-check-circle-fill"></i> Light and dark mode supported</li>
           </ul>
           <div class="ops-row">
             <span class="op-chip convert-chip">Convert</span>
             <span class="op-chip add-chip">Add</span>
             <span class="op-chip subtract-chip">Subtract</span>
+            <span class="op-chip compare-chip">Compare</span>
             <span class="op-chip divide-chip">Divide</span>
-            <span class="op-chip multiply-chip">Multiply</span>
           </div>
         </div>
 
         <div class="recent-box">
           <div class="recent-header">
             <h3>Recent Activity</h3>
-            <a (click)="showTab('history')">View All <span>→</span></a>
+            <a (click)="showTab('history')">View All <span>-></span></a>
           </div>
 
           <div *ngIf="activeHistory.length === 0">
@@ -167,9 +167,25 @@
     <ng-container *ngIf="activeTab === 'history'">
       <h2 class="page-title"><i class="bi bi-clock-history page-icon history-icon"></i> History</h2>
       <p class="page-sub">All your past calculations.</p>
-      <button type="button" class="btn-danger-outline" (click)="clearAllHistory()">
-        <i class="bi bi-trash trash-icon"></i> Clear All
-      </button>
+      <div class="history-toolbar">
+        <button type="button" class="btn-danger-outline" (click)="clearAllHistory()">
+          <i class="bi bi-trash trash-icon"></i> Clear All
+        </button>
+
+        <label class="history-filter">
+          <span>Filter</span>
+          <select [ngModel]="historyFilter" (ngModelChange)="onHistoryFilterChange($event)">
+            <option value="all">All operations</option>
+            <option value="convert">Convert</option>
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+            <option value="compare">Compare</option>
+            <option value="divide">Divide</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="empty-msg" *ngIf="historyLoading">Loading history...</div>
 
       <div class="history-list" *ngIf="history.length > 0; else noHistory">
         <div class="timeline">
@@ -199,7 +215,7 @@
       </div>
 
       <ng-template #noHistory>
-        <div class="empty-msg">No history yet. Start calculating!</div>
+        <div class="empty-msg" *ngIf="!historyLoading">No history yet. Start calculating!</div>
       </ng-template>
     </ng-container>
   </main>
